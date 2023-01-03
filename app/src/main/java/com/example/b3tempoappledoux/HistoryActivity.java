@@ -13,6 +13,8 @@ import com.example.b3tempoappledoux.databinding.ActivityHistoryBinding;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import retrofit2.Call;
@@ -46,7 +48,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         if (edfApi != null) {
             // Create call to getTempoDaysLeft
-            Call<TempoHistory> call = edfApi.getTempoHistory("2021", "2022");
+            Call<TempoHistory> call = edfApi.getTempoHistory("2022", "2023");
 
             call.enqueue(new Callback<TempoHistory>() {
                 @Override
@@ -54,6 +56,8 @@ public class HistoryActivity extends AppCompatActivity {
                     tempoDates.clear();
                     if (response.code() == HttpURLConnection.HTTP_OK && response.body() != null) {
                         tempoDates.addAll(response.body().getTempoDates());
+                        // Pour inverser les dates
+                        Collections.reverse(tempoDates);
                         Log.d(LOG_TAG,"nb elements = " + tempoDates.size());
                     }
                     tempoDateAdapter.notifyDataSetChanged();

@@ -1,6 +1,9 @@
 package com.example.b3tempoappledoux;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.b3tempoappledoux.databinding.ActivityMainBinding;
 
 import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -19,6 +24,7 @@ import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    public static final String CHANNEL_ID = "tempo_alert_channel_id";
     public static IEdfApi edfApi;
     ActivityMainBinding binding;
 
@@ -30,6 +36,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // init views
         binding.historyBt.setOnClickListener(this);
+
+        // Create notification channel
+        createNotificationChannel();
 
         // Init Retrofit client
         Retrofit retrofitClient = ApiClient.get();
@@ -68,7 +77,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Call to getTempoDaysColor
         Call<TempoDaysColor> call2;
-        call2 = edfApi.getTempoDaysColor("2022-12-12",IEdfApi.EDF_TEMPO_API_ALERT_TYPE);
+        String formatDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        call2 = edfApi.getTempoDaysColor(formatDate,IEdfApi.EDF_TEMPO_API_ALERT_TYPE);
 
         call2.enqueue(new Callback<TempoDaysColor>() {
             @Override
@@ -89,6 +99,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.e(LOG_TAG, "call to getTempoDaysColor() failed ");
             }
         });
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private void checkColor4notif(TempoColor color) {
+    if (color == TempoColor.RED || color == TempoColor.WHITE) {
+        }
     }
 
     @Override
